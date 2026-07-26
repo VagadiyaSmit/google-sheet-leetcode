@@ -1,19 +1,29 @@
-import json
 import os
+import json
 import requests
+from pathlib import Path
 
 WEBHOOK = os.environ["SHEET_WEBHOOK"]
 
-# Change this before running
-title_slug = "palindrome-number"
+# Find latest LeetHub folder
+folders = [
+    f for f in Path(".").iterdir()
+    if f.is_dir() and f.name[:4].isdigit()
+]
+
+latest = max(folders, key=lambda x: x.stat().st_mtime)
+
+folder_name = latest.name
+
+title_slug = folder_name.split("-", 1)[1]
 
 query = """
 query getQuestionDetail($titleSlug: String!) {
   question(titleSlug: $titleSlug) {
-    questionId
+    questionFrontendId
     title
-    difficulty
     titleSlug
+    difficulty
   }
 }
 """
@@ -33,13 +43,17 @@ response = requests.post(
 question = response.json()["data"]["question"]
 
 payload = {
-    "id": question["questionId"],
+    "id": question["questionFrontendId"],
     "name": question["title"],
     "difficulty": question["difficulty"],
-    "date": "",
+    "date": os.popen("date +%F").read().strip(),
     "github": f"https://leetcode.com/problems/{question['titleSlug']}/"
 }
 
-r = requests.post(WEBHOOK, json=payload)
+requests.post(
+    WEBHOOK,
+    headers={"Content-Type": "application/json"},
+    data=json.dumps(payload)
+)
 
-print(r.text)
+print("Google Sheet Updated Successfully")
