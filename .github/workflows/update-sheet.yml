@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
@@ -18,7 +19,7 @@ jobs:
 
       - run: pip install requests
 
-      - name: Run automation
+      - name: Update Google Sheet
         env:
           SHEET_WEBHOOK: ${{ secrets.SHEET_WEBHOOK }}
         run: python scripts/update_sheet.py
