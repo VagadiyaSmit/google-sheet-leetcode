@@ -10,14 +10,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Send data to Google Sheet
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Get Latest Commit
+        id: commit
         run: |
-          curl -X POST "https://script.google.com/macros/s/AKfycbymgyYwZTv1kDuCQWJOl5BkCCMxVRAb1OBB50Tt9AVApHhgRZjtdXK_nPLYc0LevmyK/exec" \
+          echo "message=$(git log -1 --pretty=%s)" >> $GITHUB_OUTPUT
+          echo "date=$(date +%F)" >> $GITHUB_OUTPUT
+
+      - name: Send Data to Google Sheet
+        run: |
+          curl -X POST "${{ secrets.SHEET_WEBHOOK }}" \
           -H "Content-Type: application/json" \
-          -d '{
-            "id":"19",
-            "name":"Remove Nth Node From End of List",
-            "difficulty":"Medium",
-            "date":"2026-07-26",
-            "github":"https://github.com/VagadiyaSmit/google-sheet-leetcode"
-          }'
+          -d "{
+            \"id\":\"${{ github.run_number }}\",
+            \"name\":\"${{ steps.commit.outputs.message }}\",
+            \"difficulty\":\"Easy\",
+            \"date\":\"${{ steps.commit.outputs.date }}\",
+            \"github\":\"https://github.com/${{ github.repository }}\"
+          }"
