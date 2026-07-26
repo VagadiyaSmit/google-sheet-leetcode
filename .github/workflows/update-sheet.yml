@@ -6,27 +6,19 @@ on:
       - main
 
 jobs:
-  update-sheet:
+  update:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Get Latest Commit
-        id: commit
-        run: |
-          echo "message=$(git log -1 --pretty=%s)" >> $GITHUB_OUTPUT
-          echo "date=$(date +%F)" >> $GITHUB_OUTPUT
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-      - name: Send Data to Google Sheet
-        run: |
-          curl -X POST "${{ secrets.SHEET_WEBHOOK }}" \
-          -H "Content-Type: application/json" \
-          -d "{
-            \"id\":\"${{ github.run_number }}\",
-            \"name\":\"${{ steps.commit.outputs.message }}\",
-            \"difficulty\":\"Easy\",
-            \"date\":\"${{ steps.commit.outputs.date }}\",
-            \"github\":\"https://github.com/${{ github.repository }}\"
-          }"
+      - run: pip install requests
+
+      - name: Run automation
+        env:
+          SHEET_WEBHOOK: ${{ secrets.SHEET_WEBHOOK }}
+        run: python scripts/update_sheet.py
