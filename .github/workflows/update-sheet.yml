@@ -1,0 +1,23 @@
+name: Update Google Sheet
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-sheet:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send data to Google Sheet
+        run: |
+          curl -X POST "https://script.google.com/macros/s/AKfycbymgyYwZTv1kDuCQWJOl5BkCCMxVRAb1OBB50Tt9AVApHhgRZjtdXK_nPLYc0LevmyK/exec" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "id":"19",
+            "name":"Remove Nth Node From End of List",
+            "difficulty":"Medium",
+            "date":"2026-07-26",
+            "github":"https://github.com/VagadiyaSmit/google-sheet-leetcode"
+          }'
